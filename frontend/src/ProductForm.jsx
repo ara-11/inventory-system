@@ -18,8 +18,12 @@ function ProductForm({ onProductSaved, productToEdit, cancelEdit }) {
     e.preventDefault();
 
     const url = productToEdit
-      ? 'https://phpcrudonreact.infinityfreeapp.com/inventory-system/update.php'
-      : 'https://phpcrudonreact.infinityfreeapp.com/inventory-system/add.php';
+      ? 'http://localhost/inventory-system/update.php'
+      : 'http://localhost/inventory-system/add.php';
+
+    //    const url = productToEdit
+      //? 'https://phpcrudonreact.infinityfreeapp.com/inventory-system/update.php'
+     // : 'https://phpcrudonreact.infinityfreeapp.com/inventory-system/add.php';
 
     const bodyData = productToEdit
       ? { id: productToEdit.id, name, quantity, price }
