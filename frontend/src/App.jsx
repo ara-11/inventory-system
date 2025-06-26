@@ -8,7 +8,7 @@ function App() {
   const [searchTerm, setSearchTerm] = useState('');
 
   const fetchProducts = () => {
-    fetch('https://phpcrudonreact.infinityfreeapp.com/inventory-system/read.php')
+    fetch('http://localhost/inventory-system/read.php')
       .then((res) => res.json())
       .then((data) => setProducts(data))
       .catch((err) => console.error('Error fetching:', err));
@@ -17,7 +17,7 @@ function App() {
   const handleDelete = (id) => {
     if (!window.confirm("Are you sure you want to delete this product?")) return;
 
-    fetch('https://phpcrudonreact.infinityfreeapp.com/inventory-system/delete.php', {
+    fetch('http://localhost/inventory-system/delete.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id }),
