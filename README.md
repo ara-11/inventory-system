@@ -198,7 +198,7 @@ This project is licensed under the [MIT License](LICENSE).
 ## 👨‍💻 Author
 
 **Ara**
-📧 \[[YourEmail@example.com](mailto:YourEmail@example.com)]
+📧 \[[ara.m.duco@gmail.com](mailto:ara.m.duco@gmail.com)]
 💼 [GitHub](https://github.com/ara-11)
 
 ---
