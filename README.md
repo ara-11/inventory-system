@@ -205,13 +205,4 @@ This project is licensed under the [MIT License](LICENSE).
 
 > Thanks for checking this project out! ⭐ Star it on GitHub if you found it helpful.
 
-```
 
----
-
-Let me know if you'd like me to:
-
-- Add badges (e.g. `react`, `vite`, `license`)
-- Upload a screenshot or demo video
-- Create the actual `README.md` file now for you to copy/paste or push to GitHub
-```
