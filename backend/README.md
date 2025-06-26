@@ -12,7 +12,7 @@ A simple full-stack web app to manage inventory, built using:
 ### 🔗 Live Demo
 
 🌐 [Frontend on GitHub Pages](https://github.com/ara-11/inventory-system)
-🖥️ [Backend API (hosted on InfinityFree)](https://phpcrudonreact.infinityfreeapp.com/)
+🖥️ [Backend API (hosted on InfinityFree)](https://phpcrudonreact.infinityfreeapp.com/?i=1)
 
 ---
 
