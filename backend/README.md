@@ -11,7 +11,7 @@ A simple full-stack web app to manage inventory, built using:
 
 ### 🔗 Live Demo
 
-🌐 [Frontend on GitHub Pages](https://yourusername.github.io/your-repo-name)
+🌐 [Frontend on GitHub Pages](https://github.com/ara-11/inventory-system)
 🖥️ [Backend API (hosted on InfinityFree)](https://yourbackend.infinityfreeapp.com/inventory-system/read.php)
 
 ---
