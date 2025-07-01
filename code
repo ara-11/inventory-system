@@ -1,0 +1,324 @@
+for back end files
+
+
+<?php
+// db.php
+$host = 'localhost';
+$user = 'root';
+$pass = '';
+$db = 'inventory_system_db'; // change this
+
+$conn = new mysqli($host, $user, $pass, $db);
+
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+header('Content-Type: application/json');
+?>
+
+***********************************************************************************************************************************************************************  
+<?php
+//add.php
+// Allow CORS
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: POST, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type");
+
+// Handle preflight OPTIONS request
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit();
+}
+
+require 'db.php';
+
+$data = json_decode(file_get_contents("php://input"));
+
+if (isset($data->name, $data->quantity, $data->price)) {
+    $name = $conn->real_escape_string($data->name);
+    $quantity = intval($data->quantity);
+    $price = floatval($data->price);
+
+    $sql = "INSERT INTO products (name, quantity, price) VALUES ('$name', $quantity, $price)";
+    if ($conn->query($sql)) {
+        echo json_encode(["message" => "Product added"]);
+    } else {
+        http_response_code(500);
+        echo json_encode(["error" => $conn->error]);
+    }
+} else {
+    http_response_code(400);
+    echo json_encode(["error" => "All fields required"]);
+}
+
+***********************************************************************************************************************************************************************  
+
+<?php
+// delete.php
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: POST, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type");
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit();
+}
+
+require 'db.php';
+
+$data = json_decode(file_get_contents("php://input"));
+
+if (isset($data->id)) {
+    $id = intval($data->id);
+
+    $sql = "DELETE FROM products WHERE id = $id";
+    if ($conn->query($sql)) {
+        echo json_encode(["message" => "Product deleted"]);
+    } else {
+        http_response_code(500);
+        echo json_encode(["error" => $conn->error]);
+    }
+} else {
+    http_response_code(400);
+    echo json_encode(["error" => "Missing product ID"]);
+}
+
+***********************************************************************************************************************************************************************  
+
+<?php
+// read.php
+header("Access-Control-Allow-Origin: *"); // ← VERY IMPORTANT
+require 'db.php';
+
+$sql = "SELECT * FROM products ORDER BY id DESC";
+$result = $conn->query($sql);
+
+$products = [];
+
+while ($row = $result->fetch_assoc()) {
+    $products[] = $row;
+}
+
+echo json_encode($products);
+?>
+***********************************************************************************************************************************************************************  
+
+<?php
+//update.php
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: POST, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type");
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit();
+}
+
+require 'db.php';
+
+$data = json_decode(file_get_contents("php://input"));
+
+if (isset($data->id, $data->name, $data->quantity, $data->price)) {
+    $id = intval($data->id);
+    $name = $conn->real_escape_string($data->name);
+    $quantity = intval($data->quantity);
+    $price = floatval($data->price);
+
+    $sql = "UPDATE products SET name='$name', quantity=$quantity, price=$price WHERE id=$id";
+    if ($conn->query($sql)) {
+        echo json_encode(["message" => "Product updated"]);
+    } else {
+        http_response_code(500);
+        echo json_encode(["error" => $conn->error]);
+    }
+} else {
+    http_response_code(400);
+    echo json_encode(["error" => "Missing fields"]);
+}
+                          end of back end files
+***********************************************************************************************************************************************************************  
+
+
+for front end files
+
+// src/App.jsx
+import React, { useEffect, useState } from 'react';
+import ProductForm from './ProductForm';
+
+function App() {
+  const [products, setProducts] = useState([]);
+  const [editingProduct, setEditingProduct] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const fetchProducts = () => {
+    fetch('https://phpcrudonreact.infinityfreeapp.com/inventory-system/read.php')
+      .then((res) => res.json())
+      .then((data) => setProducts(data))
+      .catch((err) => console.error('Error fetching:', err));
+  };
+
+  const handleDelete = (id) => {
+    if (!window.confirm("Are you sure you want to delete this product?")) return;
+
+    fetch('https://phpcrudonreact.infinityfreeapp.com/inventory-system/delete.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id }),
+    })
+      .then((res) => res.json())
+      .then(() => fetchProducts())
+      .catch((err) => console.error('Error deleting:', err));
+  };
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  return (
+    <div className="container">
+      <h1>📦 Inventory System</h1>
+
+      <ProductForm
+
+        onProductSaved={fetchProducts}
+        productToEdit={editingProduct}
+        cancelEdit={() => setEditingProduct(null)}
+      />
+      <input
+  type="text"
+  className="search-input"
+  placeholder="Search product..."
+  value={searchTerm}
+  onChange={(e) => setSearchTerm(e.target.value)}
+/>
+
+
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Quantity</th>
+            <th>Price</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+        {products
+  .filter((p) =>
+    p.name.toLowerCase().includes(searchTerm.toLowerCase())
+  )
+  .map((p) => (
+    <tr key={p.id}>
+      <td>{p.name}</td>
+      <td>{p.quantity}</td>
+      <td>₱{p.price}</td>
+      <td className="action-buttons">
+        <button className="edit-button" onClick={() => setEditingProduct(p)}>
+          Edit
+        </button>
+        <button className="delete-button" onClick={() => handleDelete(p.id)}>
+          Delete
+        </button>
+      </td>
+    </tr>
+))}
+
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+export default App;
+
+***********************************************************************************************************************************************************************
+
+// src/ProductForm.jsx
+import React, { useState, useEffect } from 'react';
+
+function ProductForm({ onProductSaved, productToEdit, cancelEdit }) {
+  const [name, setName] = useState('');
+  const [quantity, setQuantity] = useState('');
+  const [price, setPrice] = useState('');
+
+  useEffect(() => {
+    if (productToEdit) {
+      setName(productToEdit.name);
+      setQuantity(productToEdit.quantity);
+      setPrice(productToEdit.price);
+    }
+  }, [productToEdit]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    const url = productToEdit
+      ? 'https://phpcrudonreact.infinityfreeapp.com/inventory-system/update.php'
+      : 'https://phpcrudonreact.infinityfreeapp.com/inventory-system/add.php';
+
+    const bodyData = productToEdit
+      ? { id: productToEdit.id, name, quantity, price }
+      : { name, quantity, price };
+
+    fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(bodyData),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        alert(data.message || 'Success');
+
+        
+        setName('');
+        setQuantity('');
+        setPrice('');
+        cancelEdit();
+        onProductSaved();
+      })
+      .catch((err) => console.error('Error:', err));
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className={`form ${productToEdit ? 'editing' : ''}`}>
+      <input
+        type="text"
+        placeholder="Product Name"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        required
+      />
+      <input
+        type="number"
+        placeholder="Quantity"
+        value={quantity}
+        onChange={(e) => setQuantity(e.target.value)}
+        required
+      />
+      <input
+        type="number"
+        placeholder="Price"
+        value={price}
+        onChange={(e) => setPrice(e.target.value)}
+        required
+      />
+      <div className="action-buttons">
+        <button type="submit">
+          {productToEdit ? 'Update Product' : 'Add Product'}
+        </button>
+        {productToEdit && (
+          <button type="button" onClick={cancelEdit} className="delete-button">
+            Cancel
+          </button>
+        )}
+      </div>
+    </form>
+  );
+}
+
+export default ProductForm;
+
+      end of front end files
+***********************************************************************************************************************************************************************  
+
